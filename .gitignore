@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment (never commit real credentials)
+.env
+
+# Build output
+dist/
+dist-ssr/
+coverage/
+
+# Uploaded files (directories kept via .gitkeep)
+uploads/originals/*
+uploads/thumbnails/*
+uploads/tmp/*
+!uploads/originals/.gitkeep
+!uploads/thumbnails/.gitkeep
+!uploads/tmp/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS / editors
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo

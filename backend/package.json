@@ -1,0 +1,41 @@
+{
+  "name": "pern-task-backend",
+  "version": "0.1.0",
+  "description": "PERN Stack Task Management — Express 5 backend (ES modules)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "db:migrate": "knex migrate:latest",
+    "db:rollback": "knex migrate:rollback",
+    "db:status": "knex migrate:status",
+    "db:seed": "knex seed:run",
+    "worker:task": "node src/workers/taskProcessor.worker.js",
+    "worker:email": "node src/workers/emailDispatch.worker.js",
+    "worker:image": "node src/workers/imageUpload.worker.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bullmq": "^6.3.11",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "ioredis": "^6.0.0",
+    "knex": "^3.3.0",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.0.15",
+    "pg": "^8.23.1",
+    "sharp": "^0.35.5",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.7",
+    "socket.io-client": "^4.8.4",
+    "supertest": "^7.3.1"
+  }
+}
