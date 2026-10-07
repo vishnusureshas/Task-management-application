@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Small custom bits Tailwind can't express in one class */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
