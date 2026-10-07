@@ -27,3 +27,7 @@ logs/
 !.vscode/extensions.json
 .idea/
 *.suo
+
+# Local plan docs (kept out of the repo per owner request)
+PERN_Task_Backend_Implementation_Plan.md
+PERN_Task_Frontend_Implementation_Plan.md
