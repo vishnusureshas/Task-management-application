@@ -1,0 +1,118 @@
+# PERN Task Management — full stack (plan §27 / Checkpoint 8).
+# Canonical ports: API :5000, MailHog UI :8025 (see frontend implementation plan §3).
+# Usage:  docker compose up --build
+# Frontend runs separately:  cd frontend && VITE_API_URL=http://localhost:5000 npm run dev
+
+x-backend-env: &backend-env
+  NODE_ENV: production
+  PORT: 5000
+  DATABASE_URL: postgresql://postgres:postgres@postgres:5432/task_manager
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  SMTP_HOST: mailhog
+  SMTP_PORT: 1025
+  EMAIL_FROM: Task Manager <no-reply@taskmanager.local>
+  EMAIL_WORKER_CONCURRENCY: 5
+  UPLOAD_DIR: uploads
+  TASK_WORKER_CONCURRENCY: 5
+  MAX_UPLOAD_FILES: 5
+  MAX_UPLOAD_FILE_MB: 5
+  IMAGE_WORKER_CONCURRENCY: 3
+  SOCKET_CORS_ORIGIN: '*'
+
+services:
+  api:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Run migrations on boot so a fresh clone works with a single command.
+    command: sh -c "npx knex migrate:latest && node src/server.js"
+    volumes:
+      - uploads-data:/app/uploads
+
+  task-worker:
+    build: ./backend
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: node src/workers/taskProcessor.worker.js
+    volumes:
+      - uploads-data:/app/uploads
+
+  image-worker:
+    build: ./backend
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: node src/workers/imageUpload.worker.js
+    volumes:
+      # Shared with the API: intake stages files here, the worker stores
+      # originals + thumbnails, the API serves them back statically.
+      - uploads-data:/app/uploads
+
+  email-worker:
+    build: ./backend
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    command: node src/workers/emailDispatch.worker.js
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: task_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d task_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # HTTP UI
+
+volumes:
+  pg-data:
+  redis-data:
+  uploads-data:
