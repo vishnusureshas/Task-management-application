@@ -1,5 +1,4 @@
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
-import HealthBadge from './components/HealthBadge.jsx';
 import TasksPage from './pages/TasksPage.jsx';
 import TaskDetailPage from './pages/TaskDetailPage.jsx';
 import QueuesPage from './pages/QueuesPage.jsx';
@@ -28,7 +27,6 @@ export default function App() {
               </NavLink>
             </nav>
           </div>
-          <HealthBadge />
         </header>
         <main>
           <Routes>
